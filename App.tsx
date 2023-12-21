@@ -24,6 +24,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import EventSenderComponent from './EventSenderComponent';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -72,7 +73,7 @@ function App(): React.JSX.Element {
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
         <Header />
-        <View
+        {/* <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
@@ -90,7 +91,8 @@ function App(): React.JSX.Element {
             Read the docs to discover what to do next:
           </Section>
           <LearnMoreLinks />
-        </View>
+        </View> */}
+        <EventSenderComponent />
       </ScrollView>
     </SafeAreaView>
   );
