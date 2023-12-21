@@ -8,8 +8,26 @@ import {
   StyleSheet,
 } from 'react-native';
 
+// Define the HistoryEntry type
+interface HistoryEntry {
+  result: string;
+  iterations: number;
+  sleepDuration: number;
+  duration: number;
+  startDate: Date;
+}
+
+// Define the InputComponentProps type
+type InputComponentProps = {
+  value: string;
+  onChange: (text: string) => void;
+};
+
 // Subcomponent: Number of Iterations
-const NbrOfIterationsComponent = ({value, onChange}) => (
+const NbrOfIterationsComponent: React.FC<InputComponentProps> = ({
+  value,
+  onChange,
+}) => (
   <View style={styles.inputContainer}>
     <Text>Number of iterations:</Text>
     <TextInput
@@ -22,7 +40,10 @@ const NbrOfIterationsComponent = ({value, onChange}) => (
 );
 
 // Subcomponent: Sleep Duration
-const SleepDurationComponent = ({value, onChange}) => (
+const SleepDurationComponent: React.FC<InputComponentProps> = ({
+  value,
+  onChange,
+}) => (
   <View style={styles.inputContainer}>
     <Text>Sleep duration (s):</Text>
     <TextInput
@@ -34,21 +55,32 @@ const SleepDurationComponent = ({value, onChange}) => (
   </View>
 );
 
+// Define the StateComponentProps type
+type StateComponentProps = {
+  isRunning: boolean;
+};
+
 // Subcomponent: State
-const StateComponent = ({isRunning}) => (
+const StateComponent: React.FC<StateComponentProps> = ({isRunning}) => (
   <View style={styles.stateContainer}>
     <Text>State:</Text>
-    <View
-      style={[
-        styles.stateSquare,
-        {backgroundColor: isRunning ? 'green' : 'red'},
-      ]}
-    />
+    <Text>{isRunning ? 'Running' : 'Not Running'}</Text>
   </View>
 );
 
+// Define the ControlProps type
+type ControlProps = {
+  onStart: () => void;
+  onStop: () => void;
+  isRunning: boolean;
+};
+
 // Subcomponent: Control
-const ControlComponent = ({onStart, onStop, isRunning}) => (
+const ControlComponent: React.FC<ControlProps> = ({
+  onStart,
+  onStop,
+  isRunning,
+}) => (
   <View style={styles.controlContainer}>
     <Button title="Start" onPress={onStart} disabled={isRunning} />
     <Button title="Stop" onPress={onStop} disabled={!isRunning} />
@@ -56,7 +88,7 @@ const ControlComponent = ({onStart, onStop, isRunning}) => (
 );
 
 // Subcomponent: History List
-const HistoryListComponent = ({history}) => (
+const HistoryListComponent = ({history}: {history: HistoryEntry[]}) => (
   <ScrollView style={styles.historyList}>
     {history.map((entry, index) => (
       <Text key={index}>
@@ -71,9 +103,9 @@ const EventSenderComponent = () => {
   const [nbrOfIterations, setNbrOfIterations] = useState('0');
   const [sleepDuration, setSleepDuration] = useState('0');
   const [isRunning, setIsRunning] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
-  const sendEvents2Datadog = async (iterations, sleep) => {
+  const sendEvents2Datadog = async (iterations: number, sleep: number) => {
     // Placeholder for the actual sendEvents2Datadog function
     console.log(
       `Sending ${iterations} events to Datadog with a sleep of ${sleep} seconds each.`,
@@ -81,6 +113,7 @@ const EventSenderComponent = () => {
     setIsRunning(true);
     // Simulate sending events and sleeping
     for (let i = 0; i < iterations; i++) {
+      sleep(sleep * 1000);
       await new Promise(resolve => setTimeout(resolve, sleep * 1000));
     }
     setIsRunning(false);
@@ -91,12 +124,12 @@ const EventSenderComponent = () => {
     const iterations = parseInt(nbrOfIterations, 10);
     const sleep = parseInt(sleepDuration, 10);
     if (iterations > 0 && sleep > 0) {
-      const startTime = Date.now();
+      const startTime = new Date();
       sendEvents2Datadog(iterations, sleep).then(result => {
-        const duration = (Date.now() - startTime) / 1000;
+        const duration = (Date.now() - startTime.getTime()) / 1000;
         setHistory([
           ...history,
-          {result, iterations, sleepDuration: sleep, duration},
+          {startTime, result, iterations, sleepDuration: sleep, duration},
         ]);
       });
     }
@@ -163,5 +196,4 @@ const styles = StyleSheet.create({
     maxHeight: 200,
   },
 });
-
 export default EventSenderComponent;
