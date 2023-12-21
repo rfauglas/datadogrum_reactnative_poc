@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ interface HistoryEntry {
   iterations: number;
   sleepDuration: number;
   duration: number;
-  startDate: Date;
+  startTime: Date;
 }
 
 // Define the InputComponentProps type
@@ -92,7 +92,11 @@ const HistoryListComponent = ({history}: {history: HistoryEntry[]}) => (
   <ScrollView style={styles.historyList}>
     {history.map((entry, index) => (
       <Text key={index}>
-        {`Result: ${entry.result}, Iterations: ${entry.iterations}, Duration: ${entry.duration}s, Sleep: ${entry.sleepDuration}s`}
+        {`Start date: ${entry.startTime.toISOString()}, Result: ${
+          entry.result
+        }, Iterations: ${entry.iterations}, Duration: ${
+          entry.duration
+        }s, Sleep: ${entry.sleepDuration}s`}
       </Text>
     ))}
   </ScrollView>
@@ -103,9 +107,24 @@ const EventSenderComponent = () => {
   const [nbrOfIterations, setNbrOfIterations] = useState('0');
   const [sleepDuration, setSleepDuration] = useState('0');
   const [isRunning, setIsRunning] = useState(false);
+  const [shouldStop, setShouldStop] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
-  const sendEvents2Datadog = async (iterations: number, sleep: number) => {
+  interface ExecutionResult {
+    executionStatus: string;
+    lastIteration: number;
+  }
+
+  const shouldStopRef = useRef(false);
+
+  useEffect(() => {
+    shouldStopRef.current = shouldStop;
+  }, [shouldStop]);
+
+  const sendEvents2Datadog = async (
+    iterations: number,
+    sleep: number,
+  ): Promise<ExecutionResult> => {
     // Placeholder for the actual sendEvents2Datadog function
     console.log(
       `Sending ${iterations} events to Datadog with a sleep of ${sleep} seconds each.`,
@@ -113,11 +132,14 @@ const EventSenderComponent = () => {
     setIsRunning(true);
     // Simulate sending events and sleeping
     for (let i = 0; i < iterations; i++) {
-      sleep(sleep * 1000);
+      if (shouldStopRef.current) {
+        return {executionStatus: 'Cancelled', lastIteration: i + 1};
+      }
       await new Promise(resolve => setTimeout(resolve, sleep * 1000));
     }
     setIsRunning(false);
-    return 'Success'; // Placeholder for the actual result
+    setShouldStop(false);
+    return {executionStatus: 'Success', lastIteration: iterations}; // Placeholder for the actual result
   };
 
   const handleStart = () => {
@@ -127,9 +149,15 @@ const EventSenderComponent = () => {
       const startTime = new Date();
       sendEvents2Datadog(iterations, sleep).then(result => {
         const duration = (Date.now() - startTime.getTime()) / 1000;
-        setHistory([
-          ...history,
-          {startTime, result, iterations, sleepDuration: sleep, duration},
+        setHistory(prevHistory => [
+          ...prevHistory,
+          {
+            startTime,
+            result: result.executionStatus,
+            iterations: result.lastIteration,
+            sleepDuration: sleep,
+            duration,
+          },
         ]);
       });
     }
@@ -137,6 +165,7 @@ const EventSenderComponent = () => {
 
   const handleStop = () => {
     // Placeholder for stopping the sendEvents2Datadog function
+    setShouldStop(true);
     setIsRunning(false);
   };
 
