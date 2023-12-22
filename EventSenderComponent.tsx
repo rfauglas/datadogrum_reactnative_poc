@@ -1,4 +1,8 @@
-import {DdRum, DdSdkReactNative, RumActionType} from '@datadog/mobile-react-native';
+import {
+  DdRum,
+  DdSdkReactNative,
+  RumActionType,
+} from '@datadog/mobile-react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -47,6 +51,22 @@ const SleepDurationComponent: React.FC<InputComponentProps> = ({
 }) => (
   <View style={styles.inputContainer}>
     <Text>Sleep duration (s):</Text>
+    <TextInput
+      style={styles.input}
+      keyboardType="numeric"
+      value={value}
+      onChangeText={onChange}
+    />
+  </View>
+);
+
+// Subcomponent: Number of Fields
+const NbrOfFieldsComponent: React.FC<InputComponentProps> = ({
+  value,
+  onChange,
+}) => (
+  <View style={styles.inputContainer}>
+    <Text>Number of fields:</Text>
     <TextInput
       style={styles.input}
       keyboardType="numeric"
@@ -107,6 +127,7 @@ const HistoryListComponent = ({history}: {history: HistoryEntry[]}) => (
 const EventSenderComponent = () => {
   const [nbrOfIterations, setNbrOfIterations] = useState('10');
   const [sleepDuration, setSleepDuration] = useState('1');
+  const [nbrOfFields, setNbrOfFields] = useState('10');
   const [isRunning, setIsRunning] = useState(false);
   const [shouldStop, setShouldStop] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -122,13 +143,23 @@ const EventSenderComponent = () => {
     shouldStopRef.current = shouldStop;
   }, [shouldStop]);
 
+  const constantValue = 'x'.repeat(50);
+  const generateAttributes = (nbrOfFields: number) => {
+    const attributes = {};
+    for (let i = 0; i < nbrOfFields; i++) {
+      attributes[`i-${i}`] = constantValue;
+    }
+    return attributes;
+  };
+
   const sendEvents2Datadog = async (
     iterations: number,
     sleep: number,
+    fields: number,
   ): Promise<ExecutionResult> => {
     // Placeholder for the actual sendEvents2Datadog function
     console.log(
-      `Sending ${iterations} events to Datadog with a sleep of ${sleep} seconds each.`,
+      `Sending ${iterations} events to Datadog with a sleep of ${sleep} seconds each and ${fields} fields.`,
     );
     setIsRunning(true);
     // Simulate sending events and sleeping
@@ -138,10 +169,12 @@ const EventSenderComponent = () => {
       }
       await new Promise(resolve => {
         setTimeout(resolve, sleep * 1000);
-        DdRum.addAction(RumActionType.CUSTOM, 'name', {
-          button_name: 'my_button',
-          button_label: 'My Button',
-        });
+        DdRum.addAction(
+          RumActionType.CUSTOM,
+          `name-${i}`,
+          generateAttributes(fields),
+          Date.now(),
+        );
       });
     }
     setIsRunning(false);
@@ -152,15 +185,16 @@ const EventSenderComponent = () => {
   const handleStart = () => {
     const iterations = parseInt(nbrOfIterations, 10);
     const sleep = parseInt(sleepDuration, 10);
-    if (iterations > 0 && sleep > 0) {
+    const fields = parseInt(nbrOfFields, 10);
+    if (iterations > 0 && sleep > 0 && fields > 0) {
+      const startTime = new Date();
       DdRum.startView(
         'event-loader-view', // <view-key> doit être unique, par exemple ViewName-unique-id
-        'Event loader view',
+        `Event loader view: ${startTime.toISOString()}`,
         {},
         Date.now(),
       );
-      const startTime = new Date();
-      sendEvents2Datadog(iterations, sleep).then(result => {
+      sendEvents2Datadog(iterations, sleep, fields).then(result => {
         const duration = (Date.now() - startTime.getTime()) / 1000;
         setHistory(prevHistory => [
           ...prevHistory,
@@ -193,6 +227,7 @@ const EventSenderComponent = () => {
         value={sleepDuration}
         onChange={setSleepDuration}
       />
+      <NbrOfFieldsComponent value={nbrOfFields} onChange={setNbrOfFields} />
       <StateComponent isRunning={isRunning} />
       <ControlComponent
         onStart={handleStart}
