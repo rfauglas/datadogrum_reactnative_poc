@@ -3,6 +3,34 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 # Getting Started
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Step 0: check you configuration.
+ Ensure you have those environment variables set
+ ```shell
+ # React native
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export JAVA_HOME=/usr/lib/jvm/default-java
+export PATH=$PATH:$JAVA_HOME/bin
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/10.0/bin
+ ```
+You could add those to your favorite shell configuration (like ~/.zshrc or ~/.bashrc).
+You should also create a .env file:
+```.env
+DATADOG_CLIENT_TOKEN=<DATADOG_CLIENT_TOKEN>
+DATADOG_ENVIRONMENT=<DATADOG_CLIENT_TOKEN>
+DATADOG_APPLICATION_ID=<DATADOG_CLIENT_TOKEN>
+DATADOG_TRACK_USER_INTERACTIONS=true
+DATADOG_TRACK_XHR_RESOURCES=true
+DATADOG_TRACK_ERRORS=true
+```
+Whenever your environment is changed you should perform those commands to ensure it is taken into account:
+```shell
+cd android
+./gradlew clean
+cd ..
+npm run android
+```
 
 ## Step 1: Start the Metro Server
 
@@ -65,6 +93,7 @@ You've successfully run and modified your React Native App. :partying_face:
 - If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
 
 # Troubleshooting
+
 
 If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
 
