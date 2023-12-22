@@ -28,6 +28,8 @@ import {
   DatadogProvider,
   DdSdkReactNative,
   DdSdkReactNativeConfiguration,
+  ProxyConfiguration,
+  ProxyType,
 } from '@datadog/mobile-react-native';
 
 import Config from 'react-native-config';
@@ -42,6 +44,35 @@ const config = new DdSdkReactNativeConfiguration(
   true, // track XHR Resources
   true, // track Errors
 );
+
+if (
+  Config.DATADOG_PROXY_HOST &&
+  Config.DATADOG_PROXY_TYPE &&
+  Config.DATADOG_PROXY_PORT &&
+  +Config.DATADOG_PROXY_PORT
+) {
+  let proxyType: ProxyType;
+
+  switch (Config.DATADOG_PROXY_TYPE) {
+    case 'http':
+      proxyType = ProxyType.HTTP;
+      break;
+    case 'https':
+      proxyType = ProxyType.HTTPS;
+      break;
+    case 'socks':
+      proxyType = ProxyType.SOCKS;
+      break;
+    default:
+      throw new Error(`Invalid proxy type: ${Config.DATADOG_PROXY_TYPE}`);
+  }
+
+  config.proxyConfig = new ProxyConfiguration(
+    proxyType,
+    Config.DATADOG_PROXY_HOST,
+    +Config.DATADOG_PROXY_PORT,
+  );
+}
 
 DdSdkReactNative.initialize(config).then(() => {
   DdSdkReactNative.setUser({

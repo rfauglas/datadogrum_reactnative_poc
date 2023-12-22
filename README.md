@@ -23,7 +23,11 @@ DATADOG_APPLICATION_ID=<DATADOG_CLIENT_TOKEN>
 DATADOG_TRACK_USER_INTERACTIONS=true
 DATADOG_TRACK_XHR_RESOURCES=true
 DATADOG_TRACK_ERRORS=true
+DATADOG_PROXY_HOST=localhost
+DATADOG_PROXY_PORT=8443
+DATADOG_PROXY_TYPE=https
 ```
+DATADOG_PROXY_TYPE can be https, http or socks as documented.
 Whenever your environment is changed you should perform those commands to ensure it is taken into account:
 ```shell
 cd android
