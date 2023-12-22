@@ -143,10 +143,10 @@ const EventSenderComponent = () => {
     shouldStopRef.current = shouldStop;
   }, [shouldStop]);
 
-  const constantValue = 'x'.repeat(50);
-  const generateAttributes = (nbrOfFields: number) => {
+  const generateAttributes = (numberOfFields: number) => {
     const attributes = {};
-    for (let i = 0; i < nbrOfFields; i++) {
+    for (let i = 0; i < numberOfFields; i++) {
+      const constantValue = Math.random().toString(36).substring(2, 52);
       attributes[`i-${i}`] = constantValue;
     }
     return attributes;
@@ -161,17 +161,18 @@ const EventSenderComponent = () => {
     console.log(
       `Sending ${iterations} events to Datadog with a sleep of ${sleep} seconds each and ${fields} fields.`,
     );
+    const startTime = new Date();
     setIsRunning(true);
     // Simulate sending events and sleeping
-    for (let i = 0; i < iterations; i++) {
+    for (let i = 1; i <= iterations; i++) {
       if (shouldStopRef.current) {
-        return {executionStatus: 'Cancelled', lastIteration: i + 1};
+        return {executionStatus: 'Cancelled', lastIteration: i};
       }
       await new Promise(resolve => {
         setTimeout(resolve, sleep * 1000);
         DdRum.addAction(
           RumActionType.CUSTOM,
-          `name-${i}`,
+          `name-${i}-${startTime.toISOString()}`,
           generateAttributes(fields),
           Date.now(),
         );
@@ -189,7 +190,7 @@ const EventSenderComponent = () => {
     if (iterations > 0 && sleep > 0 && fields > 0) {
       const startTime = new Date();
       DdRum.startView(
-        'event-loader-view', // <view-key> doit être unique, par exemple ViewName-unique-id
+        `event-loader-view-${startTime.toISOString()}`, // <view-key> doit être unique, par exemple ViewName-unique-id
         `Event loader view: ${startTime.toISOString()}`,
         {},
         Date.now(),
@@ -207,7 +208,7 @@ const EventSenderComponent = () => {
           },
         ]);
       });
-      DdRum.stopView('event-loader-view', {}, Date.now());
+      DdRum.stopView(`event-loader-view-${startTime.toISOString()}`, {}, Date.now());
     }
   };
 
