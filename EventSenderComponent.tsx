@@ -161,7 +161,6 @@ const EventSenderComponent = () => {
     console.log(
       `Sending ${iterations} events to Datadog with a sleep of ${sleep} seconds each and ${fields} fields.`,
     );
-    const startTime = new Date();
     setIsRunning(true);
     // Simulate sending events and sleeping
     for (let i = 1; i <= iterations; i++) {
@@ -172,7 +171,7 @@ const EventSenderComponent = () => {
         setTimeout(resolve, sleep * 1000);
         DdRum.addAction(
           RumActionType.CUSTOM,
-          `name-${i}-${startTime.toISOString()}`,
+          `name-${i}-${new Date().toISOString()}`,
           generateAttributes(fields),
           Date.now(),
         );
