@@ -24,7 +24,9 @@ DerivedData
 *.ipa
 *.xcuserstate
 ios/.xcode.env.local
+ .vscode/.react/debuggerWorker.js
 
+ 
 # Android/IntelliJ
 #
 build/
