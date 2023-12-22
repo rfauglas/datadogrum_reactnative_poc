@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -19,38 +19,68 @@ import {
 
 import {
   Colors,
-  // DebugInstructions,
-  ReloadInstructions,
+  // // DebugInstructions,
+  // ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import EventSenderComponent from './EventSenderComponent';
+
+import {
+  DatadogProvider,
+  DdSdkReactNative,
+  DdSdkReactNativeConfiguration,
+} from '@datadog/mobile-react-native';
+
+import Config from 'react-native-config';
+
+console.log(`>>>> Datadog env: ${Config.DATADOG_ENVIRONMENT}`);
+
+const config = new DdSdkReactNativeConfiguration(
+  Config.DATADOG_CLIENT_TOKEN || '',
+  Config.DATADOG_ENVIRONMENT || '',
+  Config.DATADOG_APPLICATION_ID || '',
+  true, // track User interactions (e.g.: Tap on buttons. You can change it based on your needs)
+  true, // track XHR Resources
+  true, // track Errors
+);
+
+DdSdkReactNative.initialize(config).then(() => {
+  DdSdkReactNative.setUser({
+    id: '1337',
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    // Additional user properties can be added here.
+  });
+});
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <DatadogProvider configuration={config}>
+      <View style={styles.sectionContainer}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: isDarkMode ? Colors.white : Colors.black,
+            },
+          ]}>
+          {title}
+        </Text>
+        <Text
+          style={[
+            styles.sectionDescription,
+            {
+              color: isDarkMode ? Colors.light : Colors.dark,
+            },
+          ]}>
+          {children}
+        </Text>
+      </View>
+    </DatadogProvider>
   );
 }
 
@@ -95,5 +125,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+export default App;
+
+export default App;
 
 export default App;

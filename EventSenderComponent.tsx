@@ -1,3 +1,4 @@
+import {DdRum, DdSdkReactNative, RumActionType} from '@datadog/mobile-react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -104,8 +105,8 @@ const HistoryListComponent = ({history}: {history: HistoryEntry[]}) => (
 
 // Main component: EventSender
 const EventSenderComponent = () => {
-  const [nbrOfIterations, setNbrOfIterations] = useState('0');
-  const [sleepDuration, setSleepDuration] = useState('0');
+  const [nbrOfIterations, setNbrOfIterations] = useState('10');
+  const [sleepDuration, setSleepDuration] = useState('1');
   const [isRunning, setIsRunning] = useState(false);
   const [shouldStop, setShouldStop] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -135,7 +136,13 @@ const EventSenderComponent = () => {
       if (shouldStopRef.current) {
         return {executionStatus: 'Cancelled', lastIteration: i + 1};
       }
-      await new Promise(resolve => setTimeout(resolve, sleep * 1000));
+      await new Promise(resolve => {
+        setTimeout(resolve, sleep * 1000);
+        DdRum.addAction(RumActionType.CUSTOM, 'name', {
+          button_name: 'my_button',
+          button_label: 'My Button',
+        });
+      });
     }
     setIsRunning(false);
     setShouldStop(false);
@@ -146,6 +153,12 @@ const EventSenderComponent = () => {
     const iterations = parseInt(nbrOfIterations, 10);
     const sleep = parseInt(sleepDuration, 10);
     if (iterations > 0 && sleep > 0) {
+      DdRum.startView(
+        'event-loader-view', // <view-key> doit être unique, par exemple ViewName-unique-id
+        'Event loader view',
+        {},
+        Date.now(),
+      );
       const startTime = new Date();
       sendEvents2Datadog(iterations, sleep).then(result => {
         const duration = (Date.now() - startTime.getTime()) / 1000;
@@ -160,6 +173,7 @@ const EventSenderComponent = () => {
           },
         ]);
       });
+      DdRum.stopView('event-loader-view', {}, Date.now());
     }
   };
 
