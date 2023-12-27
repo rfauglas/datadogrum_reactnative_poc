@@ -50,7 +50,7 @@ const SleepDurationComponent: React.FC<InputComponentProps> = ({
   onChange,
 }) => (
   <View style={styles.inputContainer}>
-    <Text>Sleep duration (s):</Text>
+    <Text>Sleep duration (100ms):</Text>
     <TextInput
       style={styles.input}
       keyboardType="numeric"
@@ -126,7 +126,7 @@ const HistoryListComponent = ({history}: {history: HistoryEntry[]}) => (
 // Main component: EventSender
 const EventSenderComponent = () => {
   const [nbrOfIterations, setNbrOfIterations] = useState('10');
-  const [sleepDuration, setSleepDuration] = useState('1');
+  const [sleepDuration, setSleepDuration] = useState('10');
   const [nbrOfFields, setNbrOfFields] = useState('10');
   const [isRunning, setIsRunning] = useState(false);
   const [shouldStop, setShouldStop] = useState(false);
@@ -135,6 +135,7 @@ const EventSenderComponent = () => {
   interface ExecutionResult {
     executionStatus: string;
     lastIteration: number;
+    startTime: Date;
   }
 
   const shouldStopRef = useRef(false);
@@ -163,23 +164,36 @@ const EventSenderComponent = () => {
     );
     setIsRunning(true);
     // Simulate sending events and sleeping
+    const startTime = new Date();
+
+    DdRum.startView(
+      `event-loader-view`, // <view-key> doit être unique, par exemple ViewName-unique-id
+      `Event loader view`,
+      {},
+      Date.now(),
+    );
     for (let i = 1; i <= iterations; i++) {
       if (shouldStopRef.current) {
         return {executionStatus: 'Cancelled', lastIteration: i};
       }
       await new Promise(resolve => {
-        setTimeout(resolve, sleep * 1000);
+        setTimeout(resolve, sleep * 100);
         DdRum.addAction(
           RumActionType.CUSTOM,
-          `name-${i}-${new Date().toISOString()}`,
+          `name-${i}`,
           generateAttributes(fields),
           Date.now(),
         );
       });
     }
+    DdRum.stopView(
+      `event-loader-view`,
+      {},
+      Date.now(),
+    );
     setIsRunning(false);
     setShouldStop(false);
-    return {executionStatus: 'Success', lastIteration: iterations}; // Placeholder for the actual result
+    return {executionStatus: 'Success', lastIteration: iterations, startTime: startTime}; // Placeholder for the actual result
   };
 
   const handleStart = () => {
@@ -187,19 +201,12 @@ const EventSenderComponent = () => {
     const sleep = parseInt(sleepDuration, 10);
     const fields = parseInt(nbrOfFields, 10);
     if (iterations > 0 && sleep > 0 && fields > 0) {
-      const startTime = new Date();
-      DdRum.startView(
-        `event-loader-view-${startTime.toISOString()}`, // <view-key> doit être unique, par exemple ViewName-unique-id
-        `Event loader view: ${startTime.toISOString()}`,
-        {},
-        Date.now(),
-      );
       sendEvents2Datadog(iterations, sleep, fields).then(result => {
-        const duration = (Date.now() - startTime.getTime()) / 1000;
+        const duration = (Date.now() - result.startTime.getTime()) / 1000;
         setHistory(prevHistory => [
           ...prevHistory,
           {
-            startTime,
+            startTime: result.startTime,
             result: result.executionStatus,
             iterations: result.lastIteration,
             sleepDuration: sleep,
@@ -207,7 +214,6 @@ const EventSenderComponent = () => {
           },
         ]);
       });
-      DdRum.stopView(`event-loader-view-${startTime.toISOString()}`, {}, Date.now());
     }
   };
 

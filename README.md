@@ -27,6 +27,7 @@ DATADOG_PROXY_HOST=localhost
 DATADOG_PROXY_PORT=8443
 DATADOG_PROXY_TYPE=https
 ```
+Proxy configuration entries are optional: the should not be removed if not used.
 DATADOG_PROXY_TYPE can be https, http or socks as documented.
 Whenever your environment is changed you should perform those commands to ensure it is taken into account:
 ```shell

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { PropsWithChildren } from 'react';
+import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -30,6 +30,7 @@ import {
   DdSdkReactNativeConfiguration,
   ProxyConfiguration,
   ProxyType,
+  SdkVerbosity,
 } from '@datadog/mobile-react-native';
 
 import Config from 'react-native-config';
@@ -44,6 +45,8 @@ const config = new DdSdkReactNativeConfiguration(
   true, // track XHR Resources
   true, // track Errors
 );
+
+config.verbosity = SdkVerbosity.DEBUG;
 
 if (
   Config.DATADOG_PROXY_HOST &&
@@ -87,7 +90,7 @@ type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({ children, title }: SectionProps): React.JSX.Element {
+function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <DatadogProvider configuration={config}>
