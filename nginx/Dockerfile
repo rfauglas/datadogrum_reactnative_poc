@@ -36,6 +36,8 @@ COPY --from=builder /usr/local/nginx/modules/ngx_http_proxy_connect_module.so /u
 
 # Copy the custom Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
+# Copy certificates for SSL.
+COPY ./ssl-self-generated/ /etc/nginx/ssl/
 
 # Expose port 8080 to the host
 EXPOSE 8080
