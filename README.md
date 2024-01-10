@@ -23,12 +23,18 @@ DATADOG_APPLICATION_ID=<DATADOG_CLIENT_TOKEN>
 DATADOG_TRACK_USER_INTERACTIONS=true
 DATADOG_TRACK_XHR_RESOURCES=true
 DATADOG_TRACK_ERRORS=true
-DATADOG_PROXY_HOST=localhost
-DATADOG_PROXY_PORT=8443
-DATADOG_PROXY_TYPE=https
+DATADOG_PROXY_HOST=<proxy host or IP>
+DATADOG_PROXY_PORT=8080
+DATADOG_PROXY_TYPE=http
 ```
-Proxy configuration entries are optional: the should not be removed if not used.
+Proxy configuration entries are optional: they should  be removed if not used.
 DATADOG_PROXY_TYPE can be https, http or socks as documented.
+To use proxy:
+```shell
+docker build -t reverse-proxy .
+docker run -p 8080:8080 reverse-proxy
+```
+
 Whenever your environment is changed you should perform those commands to ensure it is taken into account:
 ```shell
 cd android
@@ -36,6 +42,8 @@ cd android
 cd ..
 npm run android
 ```
+
+
 
 ## Step 1: Start the Metro Server
 
