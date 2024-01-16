@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -51,8 +51,7 @@ config.verbosity = SdkVerbosity.DEBUG;
 if (
   Config.DATADOG_PROXY_HOST &&
   Config.DATADOG_PROXY_TYPE &&
-  Config.DATADOG_PROXY_PORT &&
-  +Config.DATADOG_PROXY_PORT
+  Config.DATADOG_PROXY_PORT
 ) {
   let proxyType: ProxyType;
 
@@ -90,6 +89,7 @@ type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
+
 function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
@@ -119,6 +119,15 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/posts/1')
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch((error: Error) => {
+        console.error('Error:', error);
+      });
+  }, []);
+
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
