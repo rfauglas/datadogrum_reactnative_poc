@@ -29,10 +29,23 @@ DATADOG_PROXY_TYPE=http
 ```
 Proxy configuration entries are optional: they should  be removed if not used.
 DATADOG_PROXY_TYPE can be https, http or socks as documented.
-To use proxy:
+To test chained proxy, get the host IP address that can be used from virtual device and docker container:
 ```shell
-docker build -t reverse-proxy .
-docker run -p 8080:8080 reverse-proxy
+hostname -I | awk '{print $1}'
+```
+ 
+This IP has to be set Android  WIFI proxy settings, on port 3128.
+It has to be set also in .env for DATADOG_PROXY_HOST
+
+Docker build commands:
+
+```shell
+docker build -t squid-proxy ./squid
+docker build -t traefik-proxy ./traefik
+
+docker run --rm -p -v ./logs:/var/log  3128:3128 squid-proxy
+docker run --rm  -p 8080:80 traefik-proxy
+
 ```
 
 Whenever your environment is changed you should perform those commands to ensure it is taken into account:
