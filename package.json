@@ -13,7 +13,7 @@
     "start-emulator": "emulator -avd ET56_API_30"
   },
   "dependencies": {
-    "@datadog/mobile-react-native": "^2.0.1",
+    "@datadog/mobile-react-native": "file:../dd-sdk-reactnative/packages/core/package.tgz",
     "react": "18.2.0",
     "react-native": "0.73.1",
     "react-native-config": "^1.5.1"
