@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import type {PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -31,6 +31,7 @@ import {
   ProxyConfiguration,
   ProxyType,
   SdkVerbosity,
+  UploadFrequency,
 } from '@datadog/mobile-react-native';
 
 import Config from 'react-native-config';
@@ -47,6 +48,22 @@ const config = new DdSdkReactNativeConfiguration(
 );
 
 config.verbosity = SdkVerbosity.DEBUG;
+config.uploadFrequency = UploadFrequency.FREQUENT;
+
+const DD_ENDPOINT = 'http://192.168.1.50:8080';
+console.log(`DD_ENDPOINT=${DD_ENDPOINT}`);
+console.log(`DATADOG_CLIENT_TOKEN=${Config.DATADOG_CLIENT_TOKEN}`);
+console.log(`DATADOG_ENVIRONMENT=${Config.DATADOG_ENVIRONMENT}`);
+console.log(`DATADOG_APPLICATION_ID=${Config.DATADOG_APPLICATION_ID}`);
+console.log(`DATADOG_PROXY_HOST=${Config.DATADOG_PROXY_HOST}`);
+console.log(`DATADOG_PROXY_TYPE=${Config.DATADOG_PROXY_TYPE}`);
+console.log(`DATADOG_PROXY_PORT=${Config.DATADOG_PROXY_PORT}`);
+
+config.customEndpoints = {
+  rum: DD_ENDPOINT,
+  logs: DD_ENDPOINT,
+  trace: DD_ENDPOINT,
+};
 
 if (
   Config.DATADOG_PROXY_HOST &&
@@ -89,8 +106,7 @@ type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <DatadogProvider configuration={config}>
@@ -117,6 +133,7 @@ function Section({children, title}: SectionProps): React.JSX.Element {
     </DatadogProvider>
   );
 }
+process.env.GLOBAL_AGENT_HTTP_PROXY = 'http://192.168.1.50:3128';
 
 function App(): React.JSX.Element {
   useEffect(() => {

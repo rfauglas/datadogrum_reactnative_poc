@@ -1,0 +1,29 @@
+# Create a new configuration file for the web-proxy target
+entryPoints:
+  web:
+    address: ":80"
+
+
+accessLog:
+  filePath: "/dev/stdout"
+  bufferingSize: 0  # Disable buffering to write logs immediately
+  fields:
+    defaultMode: "keep"
+    headers:
+      defaultMode: "keep"
+      names:
+        OriginStatus: "keep"
+
+http:
+  routers:
+    web-router:
+      rule: "PathPrefix(`/`)"
+      service: "web-service"
+      entryPoints:
+        - "web"
+
+  services:
+    web-service:
+      loadBalancer:
+        servers:
+          - url: "http://example.com"

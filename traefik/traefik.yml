@@ -7,10 +7,12 @@ entryPoints:
 accessLog:
   filePath: "/dev/stdout"
   bufferingSize: 0  # Disable buffering to write logs immediately
-
-providers:
-  file:
-    filename: /etc/traefik/dynamic_conf.yml
+  fields:
+    defaultMode: "keep"
+    headers:
+      defaultMode: "keep"
+      names:
+        OriginStatus: "keep"
 
 http:
   routers:
@@ -19,8 +21,7 @@ http:
       service: "datadog-service"
       entryPoints:
         - "websecure"
-      tls:
-        certResolver: "myresolver"
+
 
   services:
     datadog-service:
