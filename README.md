@@ -40,13 +40,10 @@ It has to be set also in .env for DATADOG_PROXY_HOST
 Docker build commands:
 
 TODO Fix following.
-Build and run the web-proxy and forward-proxy:
+Build and run the web-proxy:
 ```shell
-docker build -t traefik-forward-proxy --build-arg CONFIG_FILE=traefik.yml ./traefik
-docker run --rm -p 8080:80 traefik-forward-proxy
-
-docker build -t traefik-web-proxy --build-arg CONFIG_FILE=web_proxy.yml ./traefik
-docker run --rm -p 3128:80 traefik-web-proxy
+docker build -t squid-proxy ./squid
+docker run --rm -p 3128:3128 -v ./logs:/var/log  -v ./squid/squid.conf:/etc/squid3/squid.conf squid-proxy
 
 ```
 
