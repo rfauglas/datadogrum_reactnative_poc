@@ -5,7 +5,7 @@ FROM sameersbn/squid:3.3.8-23
 ARG CONFIG=squid.conf
 
 # Copy the Squid configuration file based on the build argument
-COPY ${CONFIG} /etc/squid/squid.conf
+COPY ${CONFIG} /etc/squid3/squid.conf
 
 RUN apt-get update && apt-get install sudo
 

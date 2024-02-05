@@ -50,7 +50,7 @@ const config = new DdSdkReactNativeConfiguration(
 config.verbosity = SdkVerbosity.DEBUG;
 config.uploadFrequency = UploadFrequency.FREQUENT;
 
-const DD_ENDPOINT = 'http://192.168.1.50:8080';
+const DD_ENDPOINT = 'https://192.168.1.50:8080';
 console.log(`DD_ENDPOINT=${DD_ENDPOINT}`);
 console.log(`DATADOG_CLIENT_TOKEN=${Config.DATADOG_CLIENT_TOKEN}`);
 console.log(`DATADOG_ENVIRONMENT=${Config.DATADOG_ENVIRONMENT}`);

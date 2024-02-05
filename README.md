@@ -39,22 +39,17 @@ It has to be set also in .env for DATADOG_PROXY_HOST
 
 Docker build commands:
 
+TODO Fix following.
+Build and run the web-proxy and forward-proxy:
 ```shell
-docker build -t squid-proxy ./squid
-docker build -t traefik-proxy ./traefik
+docker build -t traefik-forward-proxy --build-arg CONFIG_FILE=traefik.yml ./traefik
+docker run --rm -p 8080:80 traefik-forward-proxy
 
-docker run --rm -p -v ./logs:/var/log  3128:3128 squid-proxy
-docker run --rm  -p 8080:80 traefik-proxy
+docker build -t traefik-web-proxy --build-arg CONFIG_FILE=web_proxy.yml ./traefik
+docker run --rm -p 3128:80 traefik-web-proxy
 
 ```
 
-Whenever your environment is changed you should perform those commands to ensure it is taken into account:
-```shell
-cd android
-./gradlew clean
-cd ..
-npm run android
-```
 
 
 
@@ -109,6 +104,60 @@ Now that you have successfully run the app, let's modify it.
 
    For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
 
+Whenever your environment is changed you should perform those commands to ensure it is taken into account:
+```shell
+cd android
+./gradlew clean
+cd ..
+npm run android
+```
+
+## Configure endpoint
+- Create a root CA:
+```shell
+cd dd_gateway
+openssl req -x509 -sha256 -days 1825 -newkey rsa:2048 -keyout rootCA.key -out rootCA.crt --conf rootCA.conf
+ ```
+
+- Create a combined CA certificate for Android:
+```shell
+ openssl pkcs12 -export -in rootCA.crt -inkey rootCA.key -out rootCA-combined.p12
+```
+
+- Create a server certificate
+```shell
+openssl req -newkey rsa:2048 -nodes -keyout server.key -out server.csr --config server.conf 
+```
+
+- Sign certificate with root CA
+```shell
+openssl x509 -req -in server.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out server.crt -days 365 -sha256 -extfile server.conf -extensions v3_req
+```
+
+- Copy certificate for later embedding (TODO repeat for debug env...):
+```shell
+cp server.crt ../android/app/src/main/res/raw/server.crt
+cp rootCA.crt ../android/app/src/main/res/raw/server.crt
+```
+
+### Check server certificate
+```shell
+openssl x509 -in rootCA.crt -text
+```
+
+### Deploy a built application (proxy enabled)
+
+Currently debug doesn't work when proxy is enabled.
+
+
+```
+cd android
+./gradlew clean assemble
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+
+
 ## Congratulations! :tada:
 
 You've successfully run and modified your React Native App. :partying_face:
@@ -117,6 +166,7 @@ You've successfully run and modified your React Native App. :partying_face:
 
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
 - If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+
 
 # Troubleshooting
 
