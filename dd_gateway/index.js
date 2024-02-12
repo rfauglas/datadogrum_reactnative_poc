@@ -24,14 +24,20 @@ app.use((req, res, next) => {
 });
 
 app.post('/api/v2/*', (req, res) => {
+  //remove host from header
+  const {host, ...restHeaders} = req.headers;
+
   const repostOptions = {
     hostname: 'browser-intake-datadoghq.eu',
     // hostname: 'browser-intake-datadoghq.com',
     port: 443,
     path: req.originalUrl,
     method: 'POST',
-    headers: req.headers,
+    headers: restHeaders,
   };
+
+  console.log(JSON.stringify(repostOptions));
+
   const repostReq = https.request(repostOptions, repostRes => {
     console.log(`STATUS: ${repostRes.statusCode}`);
     res.writeHead(repostRes.statusCode, repostRes.headers);
@@ -44,9 +50,13 @@ app.post('/api/v2/*', (req, res) => {
 
     repostRes.on('end', () => {
       const responseBody = Buffer.concat(bodyChunks).toString();
-      console.log('Responce body');
+      console.log('Response body');
       console.log(responseBody);
       res.end();
+    });
+
+    repostRes.on('error', e => {
+      console.error(e);
     });
   });
 
